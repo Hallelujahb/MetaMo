@@ -1,4 +1,4 @@
-!(import! &self "helpers.py")
+;;!(import! &self "helpers.py")
 ;; An implementation of the Motivation Representation which will represent the state
 ;; of the metamo agent
 
