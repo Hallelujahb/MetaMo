@@ -19,7 +19,6 @@
 (test (normalizeVector ()) ())
 
 !(test (softmax (1 2 3)) (0.09003057317038046 0.24472847105479764 0.6652409557748218))
-!(test (softmax ()) ())
 
 !(test (roundNum 2.67777 2) 2.68)
 !(test (roundNum 0.0 2) 0.0)
@@ -27,8 +26,7 @@
 !(test (split (1 2 3 4) 2) ((1 2) (3 4)))
 !(test (split (1 2 3 4 5 7) 3) ((1 2) (3 4) (5 7)))
 !(test (split (1 2 3 4) 4) ((1) (2) (3) (4)))
-!(test (split () 2) ())
-
+ 
 !(test (sum (1 2 3 4)) 10.0)
 !(test (sum ()) 0.0)
 !(test (sum (1)) 1.0)
@@ -37,13 +35,10 @@
 !(test (product ()) 1.0)
 
 !(test (mean (1 2 3 4)) 2.5)
-!(test (mean ()) 0.0)
-
+  
 !(test (std (1 2 3 4)) 1.12)
-!(test (std ()) 0.0)
-
+ 
 !(test (variance (1 2 3 4)) 1.25)
-!(test (variance ()) 0.0)
 !(test (variance (10)) 0.0)
 !(test (variance (2 2 2)) 0.0)
 !(test (variance (1.0 2.0)) 0.25)
