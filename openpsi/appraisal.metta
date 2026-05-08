@@ -19,42 +19,56 @@
 )
 
 ;; Performs the core OpenPSI appraisal by updating the motivation state based on a stimulus.
-;; This function calculates new modulator values (valence, arousal, etc.) using the stimulus properties.
 ;; Example:
 ;;   (openPsiAppraise
 ;;     (motivation (0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5) (0.5 0.5 0.5 0.5 0.5 0.5))
-;;     (stimulus 0.2 0.8 0.1 0.2)
+;;     (stimulus (0.2 0.8 0.1 0.2))
 ;;   )
-(= (openPsiAppraise
-        (motivation
-            ($gInd $gTrans $gHelp $gCurio $gNovel $gSelf $gEthic $gSoc)
-            ($valence $arousal $approach $resolution $threshold $securing)
-        )
-        (stimulus $novelty $conduciveness $risk $effort)
-    )
+(= (openPsiAppraise $state $stimulus)
     (let* (
-        ($arousalFeedback (eval (openPsiArousalFeedback $arousal)))
-        ($transScale (eval (openPsiTransScale $gTrans)))
-        ($indScale (eval (openPsiIndScale $gInd)))
-        ($benignNovelty (eval (openPsiBenignNovelty $novelty $risk)))
+        ;; Extract goal values by name
+        ($gInd   (getGoal $state gInd))
+        ($gTrans (getGoal $state gTrans))
+
+        ;; Extract modulator values by name
+        ($valence    (getModulator $state valence))
+        ($arousal    (getModulator $state arousal))
+        ($approach   (getModulator $state approach))
+        ($resolution (getModulator $state resolution))
+        ($threshold  (getModulator $state threshold))
+        ($securing   (getModulator $state securing))
+
+        ;; Extract stimulus values by name
+        ($novelty       (getStimulus $stimulus novelty))
+        ($conduciveness (getStimulus $stimulus conduciveness))
+        ($risk          (getStimulus $stimulus risk))
+        ($effort        (getStimulus $stimulus effort))
+
+        ;; Intermediate values
+        ($arousalFeedback  (eval (openPsiArousalFeedback $arousal)))
+        ($transScale       (eval (openPsiTransScale $gTrans)))
+        ($indScale         (eval (openPsiIndScale $gInd)))
+        ($benignNovelty    (eval (openPsiBenignNovelty $novelty $risk)))
         ($demandingContext (eval (openPsiDemandingContext $effort $risk)))
 
-        ($deltaValence (eval (openPsiDeltaValence $conduciveness $benignNovelty $risk $effort)))
-        ($deltaArousal (eval (openPsiDeltaArousal $novelty $arousalFeedback $risk $effort)))
-        ($deltaApproach (eval (openPsiDeltaApproach $benignNovelty $conduciveness $risk)))
+        ;; Delta calculations
+        ($deltaValence    (eval (openPsiDeltaValence $conduciveness $benignNovelty $risk $effort)))
+        ($deltaArousal    (eval (openPsiDeltaArousal $novelty $arousalFeedback $risk $effort)))
+        ($deltaApproach   (eval (openPsiDeltaApproach $benignNovelty $conduciveness $risk)))
         ($deltaResolution (eval (openPsiDeltaResolution $conduciveness $effort $risk)))
-        ($deltaThreshold (eval (openPsiDeltaThreshold $risk $demandingContext $conduciveness)))
-        ($deltaSecuring (eval (openPsiDeltaSecuring $risk $effort $benignNovelty $conduciveness)))
+        ($deltaThreshold  (eval (openPsiDeltaThreshold $risk $demandingContext $conduciveness)))
+        ($deltaSecuring   (eval (openPsiDeltaSecuring $risk $effort $benignNovelty $conduciveness)))
 
-        ($nextValence (eval (openPsiNextValence $valence $deltaValence)))
-        ($nextArousal (eval (openPsiNextArousal $arousal $deltaArousal $transScale)))
-        ($nextApproach (eval (openPsiNextApproach $approach $deltaApproach $transScale)))
+        ;; Next modulator values
+        ($nextValence    (eval (openPsiNextValence $valence $deltaValence)))
+        ($nextArousal    (eval (openPsiNextArousal $arousal $deltaArousal $transScale)))
+        ($nextApproach   (eval (openPsiNextApproach $approach $deltaApproach $transScale)))
         ($nextResolution (eval (openPsiNextResolution $resolution $deltaResolution)))
-        ($nextThreshold (eval (openPsiNextThreshold $threshold $deltaThreshold $indScale)))
-        ($nextSecuring (eval (openPsiNextSecuring $securing $deltaSecuring $indScale)))
+        ($nextThreshold  (eval (openPsiNextThreshold $threshold $deltaThreshold $indScale)))
+        ($nextSecuring   (eval (openPsiNextSecuring $securing $deltaSecuring $indScale)))
     )
         (motivation
-            ($gInd $gTrans $gHelp $gCurio $gNovel $gSelf $gEthic $gSoc)
+            (motivationGoals $state)
             ($nextValence $nextArousal $nextApproach $nextResolution $nextThreshold $nextSecuring)
         )
     )
