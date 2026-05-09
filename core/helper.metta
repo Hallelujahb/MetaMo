@@ -47,3 +47,47 @@
 (= (softmax $arr)
     (py-call (helpers.softmax $arr))
 )
+
+(= (vectorAdd $arr1 $arr2)
+    (py-call (helpers.vector_add $arr1 $arr2))
+)
+
+(= (averageArrays $arr1 $arr2)
+    (py-call (helpers.average_arrays $arr1 $arr2))
+)
+
+(= (clipVector $arr $minValue $maxValue)
+    (py-call (helpers.clip_vector $arr $minValue $maxValue))
+)
+
+(= (matrixIsSquare $matrix)
+    (py-call (helpers.matrix_is_square $matrix))
+)
+
+(= (matrixVectorDot $matrix $vector)
+    (py-call (helpers.matrix_vector_dot $matrix $vector))
+)
+
+(= (absNumber $value)
+    (py-call (helpers.abs_number $value))
+)
+
+(= (expNum $value)
+    (py-call (helpers.exp_number $value))
+)
+
+(= (sigmoidNum $value)
+    (py-call (helpers.sigmoid_number $value))
+)
+
+(= (probeVector $delta $step $threshold)
+    (py-call (helpers.probe_vector $delta $step $threshold))
+)
+
+(= (parallelMergeGoals $goalsA $goalsB $coherenceCorrection)
+    (py-call (helpers.parallel_merge_goals $goalsA $goalsB $coherenceCorrection))
+)
+
+(= (parallelMergeModulators $modsA $modsB $goalsA $goalsB $coherenceCorrection)
+    (py-call (helpers.parallel_merge_modulators $modsA $modsB $goalsA $goalsB $coherenceCorrection))
+)
