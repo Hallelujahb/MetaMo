@@ -78,7 +78,7 @@ def vector_add(arr1, arr2):
     if a.shape != b.shape:
         raise ValueError("arr1 and arr2 must have the same shape")
 
-    return (a + b).tolist()
+    return np.round(a + b, 8).tolist()
 
 
 def average_arrays(arr1, arr2):
@@ -298,8 +298,12 @@ def blend_arrays(arr1, arr2, alpha):
 
 def scale_array(arr, factor):
     """Multiply each element by factor."""
-    return (np.asarray(arr, dtype=float) * float(factor)).tolist()
+    return np.round(np.asarray(arr, dtype=float) * float(factor), 8).tolist()
 
 
 def npClip(value, smallest, largest):
     return float(np.clip(value, smallest, largest))
+
+def identity_matrix(n):
+    """Returns an nxn identity matrix as a list of lists."""
+    return np.eye(int(n)).tolist()
