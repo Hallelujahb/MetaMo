@@ -2,7 +2,7 @@ import time
 
 from google import genai
 from google.genai import types
-from core.state import Action, MotivationalState
+from llm.state_types import Action, MotivationalState
 from llm.action_schema import execution_instruction, normalize_action_id
 
 class MetaMoChatAssistant:
@@ -14,7 +14,7 @@ class MetaMoChatAssistant:
         # Initialize the Gemini client
         self.client = genai.Client()
         self.chat = self.client.chats.create(
-            model='gemini-3-flash-preview',
+            model='gemini-3.1-flash-lite',
             config=types.GenerateContentConfig(
                 temperature=0.7,
                 system_instruction=(

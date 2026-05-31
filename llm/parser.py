@@ -1,7 +1,7 @@
 import json
 import numpy as np
 from typing import List
-from core.state import Stimulus, Action
+from llm.state_types import Stimulus, Action
 from llm.action_schema import DEFAULT_ACTION_ID, normalize_action_id
 
 def parse_stimulus(llm_json_response: str) -> Stimulus:

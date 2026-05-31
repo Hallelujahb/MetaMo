@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-from core.state import Action, Stimulus
+from llm.state_types import Action, Stimulus
 from llm.action_schema import DEFAULT_ACTION_ID
 from llm.parser import parse_actions, parse_stimulus
 from llm.prompts import get_action_generation_prompt, get_appraisal_prompt
@@ -30,7 +30,7 @@ def query_llm_for_json(prompt: str) -> str:
     for attempt in range(3):
         try:
             response = client.models.generate_content(
-                model="gemini-3-flash-preview",
+                model="gemini-3.1-flash-lite",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
