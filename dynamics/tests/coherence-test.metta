@@ -71,41 +71,47 @@
     False
 )
 
-;; nextStateCalculator preserves the state under its current alpha-weighted formula.
+;; nextStateCalculator blends the current state toward the target state.
 !(test
-    (nextStateCalculator (coherenceState) 0.35)
+    (nextStateCalculator (coherenceState) (coherenceState) 0.35)
     (coherenceState)
 )
 
-;; blendStatesHelper returns the provided next state when the target drift is allowed.
+!(test
+    (nextStateCalculator (coherenceState) (coherenceTarget) 0.5)
+    (motivation
+        (0.3 0.7 0.5 0.5 0.5 0.5 0.5 0.5)
+        (0.15 0.25 0.3 0.4 0.5 0.6)
+    )
+)
+
+;; blendStatesHelper returns the candidate state when the target drift is allowed.
 !(test
     (blendStatesHelper
         (coherenceState)
-        (coherenceTarget)
         (coherenceTarget)
         0.2
         0.02
         1.0
         10.0
     )
-    (coherenceTarget)
+    (motivation
+        (0.24 0.76 0.5 0.5 0.5 0.5 0.5 0.5)
+        (0.12 0.22 0.3 0.4 0.5 0.6)
+    )
 )
 
-;; blendStatesHelper also returns the provided next state once alpha reaches minAlpha.
+;; blendStatesHelper also returns the candidate state once alpha reaches minAlpha.
 !(test
     (blendStatesHelper
         (coherenceState)
         (coherenceTarget)
-        (motivation
-            (1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0)
-            (1.0 1.0 1.0 1.0 1.0 1.0)
-        )
         0.02
         0.02
         1.0
         0.0
     )
-    (coherenceTarget)
+    (nextStateCalculator (coherenceState) (coherenceTarget) 0.02)
 )
 
 ;; blendStates is stable for an already-identical current and target state.

@@ -79,15 +79,12 @@
 )
 
 ;; nextStateCalculator
-;;
-;; Build an alpha-weighted next-state candidate from a motivational state.
-;; With the current formula, the state is split into (1 - alpha) and alpha
-;; portions and recombined, so the returned state has the same goals and
-;; modulators as $currState.
-;;
+;; Build an alpha-weighted next-state candidate by blending $currState toward $targetState.
+;; Formula: (1 - alpha)*currState + alpha*targetState
 ;; Parameters:
-;;   $currState - motivation state to transform.
-;;   $alpha     - blend factor used to split and recombine the state.
+;;   $currState    - the current state to blend from.
+;;   $targetState  - the desired target state to blend toward.
+;;   $alpha        - blend factor in [0.0, 1.0].
 ;;
 ;; Returns:
 ;;   A motivation state.
@@ -95,55 +92,58 @@
 ;; Example:
 ;;   (nextStateCalculator
 ;;     (motivation (0.2 0.8) (0.1 0.2))
-;;     0.35)
-;;   => (motivation (0.2 0.8) (0.1 0.2))
-(= (nextStateCalculator $currState $alpha)
+;;     (motivation (0.6 0.4) (0.9 0.8))
+;;     0.5)
+;;   ==> (motivation (0.4 0.6) (0.5 0.5))
+(= (nextStateCalculator $currState $targetState $alpha)
     (let* (
-        ((motivation $goals $modulators) $currState)
-        ($nAlpha (- 1 $alpha))
-        ($nGoals (scaleArray $goals $nAlpha))
-        ($alphaGoals (scaleArray $goals $alpha))
-        ($nModulators (scaleArray $modulators $nAlpha))
-        ($alphaModulators (scaleArray $modulators $alpha))
-        ($newGoals (vectorAdd $nGoals $alphaGoals))
-        ($newModulators (vectorAdd $nModulators $alphaModulators))
+        ($nAlpha (- 1.0 $alpha))
+        ($newGoals    (vectorAdd (scaleArray (motivationGoals    $currState)   $nAlpha)
+                                 (scaleArray (motivationGoals    $targetState) $alpha)))
+        ($newMods     (vectorAdd (scaleArray (motivationModulators $currState)   $nAlpha)
+                                 (scaleArray (motivationModulators $targetState) $alpha)))
     )
-        (motivation $newGoals $newModulators)
+        (motivation $newGoals $newMods)
     )
 )
 
 
 ;; blendStatesHelper
 ;;
-;; Recursive worker for blendStates. It checks whether the target transition
-;; respects the drift bound, or whether alpha has reached the minimum allowed
-;; alpha. If either condition is met, it returns the current candidate next
-;; state. Otherwise, it computes another candidate and recurses.
+;; Recursive worker for blendStates.
+;; At each step it computes:
+;;   candidate = (1 - alpha)*currentState + alpha*targetState
+;; and checks the drift from currentState to that candidate.
+;; If the drift is within bounds, OR alpha has fallen to the minimum,
+;; the candidate is returned. Otherwise alpha is halved and we recurse.
+;;
+;; NOTE: $currentState is always the FIXED original state.
+;;       The blend is always computed from it, not from a rolling candidate.
+;;       This mirrors: while True: next = (1-α)*current + α*target; if ok: return
 ;;
 ;; Parameters:
-;;   $currentState       - original state used for drift checking.
-;;   $nextState          - current candidate state.
-;;   $targetState        - desired target state.
-;;   $alpha              - current blend factor.
-;;   $minAlpha           - minimum alpha threshold.
-;;   $lipschitzConstant  - multiplier used by checkSelfModelDrift.
-;;   $maxAllowedDrift    - maximum allowed approximated drift.
+;;   $currentState      - original (fixed) state, used for both blending and drift checks.
+;;   $targetState       - desired target state.
+;;   $alpha             - current blend factor.
+;;   $minAlpha          - minimum alpha threshold (terminates search).
+;;   $lipschitzConstant - multiplier used by checkSelfModelDrift.
+;;   $maxAllowedDrift   - maximum allowed approximated drift.
 ;;
 ;; Returns:
-;;   A motivation state accepted by the drift/min-alpha criteria.
+;;   A motivation state accepted by the drift / min-alpha criteria.
 ;;
 ;; Example:
-;;   (blendStatesHelper currentState nextState targetState 0.2 0.02 1.0 10.0)
-(= (blendStatesHelper $currentState $nextState $targetState $alpha $minAlpha $lipschitzConstant $maxAllowedDrift)
+;;   (blendStatesHelper currentState targetState 0.2 0.02 1.0 0.1)
+(= (blendStatesHelper $currentState $targetState $alpha $minAlpha $lipschitzConstant $maxAllowedDrift)
     (let* (
-                
-        ($selfModelDrift (checkSelfModelDrift $currentState $targetState $lipschitzConstant $maxAllowedDrift))
-        ($nextState' (nextStateCalculator $nextState $alpha))
+        ($candidate  (nextStateCalculator $currentState $targetState $alpha))
+        ($driftOk    (checkSelfModelDrift $currentState $candidate $lipschitzConstant $maxAllowedDrift))
+        ($nextAlpha  (* $alpha 0.5))
     )
-        (if (or $selfModelDrift (<= $alpha $minAlpha))
-            $nextState
-            (blendStatesHelper $currentState $nextState' $targetState $alpha $minAlpha $lipschitzConstant $maxAllowedDrift)
-        )  
+        (if (or $driftOk (<= $alpha $minAlpha))
+            $candidate
+            (blendStatesHelper $currentState $targetState $nextAlpha $minAlpha $lipschitzConstant $maxAllowedDrift)
+        )
     )
     
 )
@@ -151,9 +151,12 @@
 
 ;; blendStates
 ;;
-;; Public entry point for coherence-preserving state blending. It calculates
-;; a base alpha from the current state, derives a minimum alpha threshold, and
-;; delegates the bounded transition logic to blendStatesHelper.
+;; Public entry point for coherence-preserving state blending.
+;; Calculates a base alpha from the current state, derives a minimum alpha
+;; threshold, then delegates to blendStatesHelper.
+;;
+;; Matches python blend_states(current, target, lipschitz_constant=1.0,
+;;                              max_allowed_drift=0.1, min_alpha_scale=0.25)
 ;;
 ;; Parameters:
 ;;   $currentState       - current motivation state.
@@ -170,9 +173,8 @@
 (= (blendStates $currentState $targetState $lipschitzConstant $maxAllowedDrift $minAlphaScale)
     (let* (
         ($baseAlpha (calculateBlendFactor $currentState))
-        ($alpha $baseAlpha)
-        ($minAlpha (* $minAlphaScale $baseAlpha))
+        ($minAlpha  (* $minAlphaScale $baseAlpha))
     )
-        (blendStatesHelper $currentState $currentState $targetState $alpha $minAlpha $lipschitzConstant $maxAllowedDrift)
+        (blendStatesHelper $currentState $targetState $baseAlpha $minAlpha $lipschitzConstant $maxAllowedDrift)
     )
 )
