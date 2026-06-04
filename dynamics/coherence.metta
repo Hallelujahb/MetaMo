@@ -112,13 +112,24 @@
     )
 )
 
+;; stateTowardTarget
+;;
+;; Build an alpha-weighted transition candidate from currentState toward
+;; targetState.
+(= (stateTowardTarget $currentState $targetState $alpha)
+    (motivation
+        (blendArrays (motivationGoals $currentState) (motivationGoals $targetState) $alpha)
+        (blendArrays (motivationModulators $currentState) (motivationModulators $targetState) $alpha)
+    )
+)
+
 
 ;; blendStatesHelper
 ;;
 ;; Recursive worker for blendStates. It checks whether the target transition
 ;; respects the drift bound, or whether alpha has reached the minimum allowed
 ;; alpha. If either condition is met, it returns the current candidate next
-;; state. Otherwise, it computes another candidate and recurses.
+;; state. Otherwise, it computes a smaller partial transition and recurses.
 ;;
 ;; Parameters:
 ;;   $currentState       - original state used for drift checking.
@@ -136,13 +147,13 @@
 ;;   (blendStatesHelper currentState nextState targetState 0.2 0.02 1.0 10.0)
 (= (blendStatesHelper $currentState $nextState $targetState $alpha $minAlpha $lipschitzConstant $maxAllowedDrift)
     (let* (
-                
-        ($selfModelDrift (checkSelfModelDrift $currentState $targetState $lipschitzConstant $maxAllowedDrift))
-        ($nextState' (nextStateCalculator $nextState $alpha))
+        ($selfModelDrift (checkSelfModelDrift $currentState $nextState $lipschitzConstant $maxAllowedDrift))
+        ($nextAlpha (* 0.5 $alpha))
+        ($nextState' (stateTowardTarget $currentState $targetState $nextAlpha))
     )
         (if (or $selfModelDrift (<= $alpha $minAlpha))
             $nextState
-            (blendStatesHelper $currentState $nextState' $targetState $alpha $minAlpha $lipschitzConstant $maxAllowedDrift)
+            (blendStatesHelper $currentState $nextState' $targetState $nextAlpha $minAlpha $lipschitzConstant $maxAllowedDrift)
         )  
     )
     
@@ -173,6 +184,6 @@
         ($alpha $baseAlpha)
         ($minAlpha (* $minAlphaScale $baseAlpha))
     )
-        (blendStatesHelper $currentState $currentState $targetState $alpha $minAlpha $lipschitzConstant $maxAllowedDrift)
+        (blendStatesHelper $currentState $targetState $targetState $alpha $minAlpha $lipschitzConstant $maxAllowedDrift)
     )
 )
