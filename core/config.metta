@@ -32,9 +32,3 @@
 (MetaMoContractiveFn    defaultContractiveCheck)
 (MetaMoSafeRegionFn     defaultSafeRegionCheck)
 
-
-;;  OpenPSI / MAGUS constants  
-(= (LAMBDA_IND)   0.5)
-(= (LAMBDA_TRANS) 0.5)
-(= (THETA_SAFE)   0.3)
-(= (G_MAX)        2.0)
