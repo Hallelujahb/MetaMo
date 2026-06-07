@@ -58,3 +58,27 @@
 
 )
 )
+
+(= (getGoal $space $goal-name)
+   (get-goal $space $goal-name)
+)
+
+(= (remove-state-app $space)
+ (let $state (getState $space) (remove-atom $space $state))
+)
+
+(= (update-mods $space $mods)
+      (let* (
+         ($goal     (getGoals $space))
+         ($t   (match $space (state $turn  $x $y $z $alpha) $turn))
+         ($alpha    (match $space (state $turn  $x $y $z $alpha) $alpha))
+         ($anti  (match $space (state $turn  $x $y $z $alpha) $z))
+         ($_ (remove-state-app $space))
+         ($updated  (state  $t $goal (cons modulator-vector $mods) $anti $alpha))
+         ($_ (addState $space $updated))          
+         )
+         (println! (mods update success 🎉))
+   )
+)
+
+(= (getGoals $space)(match $space (state (turn $turn) $x $y $z $alpha) $x))
