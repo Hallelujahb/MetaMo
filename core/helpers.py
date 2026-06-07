@@ -293,7 +293,7 @@ def blend_arrays(arr1, arr2, alpha):
     """Linear blend: (1-alpha)*arr1 + alpha*arr2."""
     a = np.asarray(arr1, dtype=float)
     b = np.asarray(arr2, dtype=float)
-    return ((1.0 - float(alpha)) * a + float(alpha) * b).tolist()
+    return np.round((1.0 - float(alpha)) * a + float(alpha) * b, 8).tolist()
 
 
 def scale_array(arr, factor):
