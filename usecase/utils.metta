@@ -88,28 +88,13 @@
   (index-atom $pair 1)
  )
 )
-(= (getGoal $space $goal-name)
+(= (getGoalQwestor $space $goal-name)
    (get-goal $space $goal-name)
 )
 
 (= (remove-state-app $space)
  (let $state (getState $space) (remove-atom $space $state))
 )
-; we don't need this this should be done by the appraisal 
-
-; (= (update-mods $space $mods)
-;       (let* (
-;          ($goal     (getGoals $space))
-;          ($t   (match $space (state $turn  $x $y $z $alpha) $turn))
-;          ($alpha    (match $space (state $turn  $x $y $z $alpha) $alpha))
-;          ($anti  (match $space (state $turn  $x $y $z $alpha) $z))
-;          ($_ (remove-state-app $space))
-;          ($updated  (state  $t $goal (cons modulator-vector $mods) $anti $alpha))
-;          ($_ (addState $space $updated))          
-;          )
-;          (println! (mods update success 🎉))
-;    )
-; )
 (= (addItems $baseCase $space $items)
    (if (== $items ())
         $baseCase
@@ -128,3 +113,19 @@
     (add-atom $space $state)
 )
 (= (addAlpha $space $list)    (addItems () $space $list))
+
+; integration and cycle utilities
+
+(= (integrationState $state)
+    $state
+)
+
+(= (integrationStates $name1 $name2 $intState)
+    (
+        (subsystemState $name1 $intState)
+        (subsystemState $name2 $intState)
+    )
+)
+(= (integrationStimulus $stimulus)
+   $stimulus
+)

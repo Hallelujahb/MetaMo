@@ -102,5 +102,13 @@
 (= (projectStimulus $context-list)
   (let (stimulus $vals) (contextToStimulus $context-list) $vals)
 )
- 
+
+(= (getStimulusValues (stimulus $stimulus-list))
+  (stimulus (
+    (find_by_key novelty $stimulus-list)
+    (find_by_key conduciveness $stimulus-list)
+    (find_by_key risk $stimulus-list)
+    (find_by_key effort $stimulus-list)
+  ))
+)
  
