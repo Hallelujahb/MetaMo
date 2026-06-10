@@ -320,9 +320,23 @@ def wrap_parser(query):
 
     if result_dict is None:
         print("⚠️ Using fallback context")
-        raise RuntimeError(
-            "LLM parsing failed - no context generated after 3 attempts"
-        )
+        return [
+        ["urgent", 0.00],
+        ["complexity", 0.30],
+        ["ambiguity", 0.00],
+        ["expertise", 0.5],
+        ["threshold", 0.30],
+        ["topic_familiarity", 0.50],
+        ["failure_signal", 0.30],
+        ["intent_type", "mixed"],
+        ["reflective_intent", 0.5],
+        ["verify_request", 0],
+        ["needs_external_evidence", 0.30],
+        ["needs_task_plan", 0.20],
+        ["needs_multi_source_integration", 0.30],
+        ["valence", 0.00]
+        ]
+        
 
     ordered_keys = [
         "urgent",

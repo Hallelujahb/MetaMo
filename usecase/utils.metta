@@ -1,4 +1,7 @@
-; Map a modulator name to the element at its canonical index.
+; Map a modulator name to its canonical value in the modulator list.
+; Each modulator corresponds to a fixed index in the mod-list.
+; Returns the pair (modulator-name, value) or "value not found".
+
 (= (matchValue $modulator-name $mod-list)
     (case $modulator-name
           (
@@ -20,6 +23,9 @@
       )
 )
 
+; Retrieve the numerical value of a given modulator from the space.
+; Uses matchValue to locate the value within the modulator vector.
+
 (= (getMod $space $modulator-name)
     (let*
       (
@@ -30,8 +36,10 @@
       (index-atom $pair 1)
     )
 )
-; Clamp a value to [0, 1] 
-; this corresponds to the python clamp_to_unit_interval function 
+
+; Clamp a numeric value to [0,1].
+; Equivalent to Python's clamp_to_unit_interval function.
+
 (= (_clamp01 $x)
   (if (and (< $x 1) (> $x 0))
      $x
@@ -41,6 +49,9 @@
       )
    )
 )
+
+; Look up a value by key in a list of key-value pairs.
+; Returns the value using superpose if found, otherwise continues search.
 
 (= (find_by_key $key $dic_list)
 (if (== $dic_list ())
@@ -58,7 +69,10 @@
 
 )
 )
- 
+
+; Retrieve a goal value from the space given a goal name.
+; Maps the goal to its fixed index in the goal list.
+
 (= (get-goal $space $goal-name)
  (let*
   (
@@ -88,13 +102,13 @@
   (index-atom $pair 1)
  )
 )
+
 (= (getGoalQwestor $space $goal-name)
    (get-goal $space $goal-name)
 )
 
-(= (remove-state-app $space)
- (let $state (getState $space) (remove-atom $space $state))
-)
+; Add multiple items to a space recursively.
+
 (= (addItems $baseCase $space $items)
    (if (== $items ())
         $baseCase
@@ -108,13 +122,15 @@
      )
 )
 
+; Accessor functions for goals and state management.
+
 (= (getGoals $space) (match $space ($goals $modulators $anti-goals) $goals))
 (= (addState $space $state)
     (add-atom $space $state)
 )
-(= (addAlpha $space $list)    (addItems () $space $list))
+(= (addAlpha $space $list) (addItems () $space $list))
 
-; integration and cycle utilities
+; Utilities for integration and cycle operations.
 
 (= (integrationState $state)
     $state
@@ -128,4 +144,33 @@
 )
 (= (integrationStimulus $stimulus)
    $stimulus
+)
+
+; Print the Qwestor decision result.
+; Displays the selected action, all candidates, stimulus values, and next motivation.
+
+(= (printQwestorResult
+      (qwestor-result
+        (selected         $action-name)
+        (candidates       $candidate)
+        (next-motivation  $next-motiv)
+        (stimulus         $stim-vals)))
+  (let*
+    (
+      ($_ (println! ""))
+
+      ($_ (println! "--------------------- Qwestor Decision Report  ---------------------"))
+      ($_ (println! (stimulus $stim-vals)))
+
+      ($_ (println! "--------------------- Selected Action ------------------------------"))
+      ($_ (println! (selected_Action $action-name)))
+
+      ($_ (println! "--------------------- Candidate Actions ----------------------------"))
+      ($_ (println! (candidates $candidate)))
+
+      ($_ (println! "--------------------- Next Motivation State ------------------------"))
+      ($_ (println! (motivationSummary $next-motiv)))
+    )
+    done
+  )
 )

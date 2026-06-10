@@ -81,7 +81,8 @@
 )
 
 ; motivationSummary  
-; returns a human-readable pair-list of the MetaMo motivation state for logging
+; Returns a human-readable pair-list of the MetaMo motivation state for logging
+
 (= (motivationSummary (motivation $goals $mods))
   (let*
     (
@@ -100,11 +101,13 @@
       ($thr    (index-atom $mods 4))
       ($sec    (index-atom $mods 5))
     )
+
     (
       (gInd $gInd) (gTrans $gTrans) (gHelp $gHelp) (gCurio $gCurio)
       (gNovel $gNovel) (gSelf $gSelf) (gEthic $gEthic) (gSoc $gSoc)
       (valence $val) (arousal $ar) (approach $app) (resolution $res)
       (threshold $thr) (securing $sec)
     )
+    
   )
 )

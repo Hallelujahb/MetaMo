@@ -103,6 +103,9 @@
   (let (stimulus $vals) (contextToStimulus $context-list) $vals)
 )
 
+; getStimulusValues
+; Extracts the raw stimulus values from a stimulus atom
+
 (= (getStimulusValues (stimulus $stimulus-list))
   (stimulus (
     (find_by_key novelty $stimulus-list)
