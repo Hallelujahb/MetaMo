@@ -27,12 +27,6 @@ jobs:
       - name: Checkout MetaMo
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-
       - name: Install SWI-Prolog
         run: |
           sudo apt-get update
@@ -42,6 +36,25 @@ jobs:
           sudo apt-get install -y swi-prolog
           swipl --version
           dpkg --compare-versions "$(swipl --version | awk '{print $3}')" ge 9.1.12
+
+      - name: Detect SWI-Prolog Python version
+        id: swi-python
+        run: |
+          set -o pipefail
+          version="$(
+            swipl -q -g "use_module(library(janus)), py_call(sys:version, Version), writeln(Version), halt." \
+              | awk '{print $1}' \
+              | cut -d. -f1,2
+          )"
+          test -n "$version"
+          echo "SWI-Prolog embeds Python $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ steps.swi-python.outputs.version }}
+          cache: pip
 
       - name: Checkout PeTTa
         run: |
