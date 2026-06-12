@@ -4,11 +4,9 @@ from __future__ import annotations
 import argparse
 import os
 import pathlib
-import site
 import shutil
 import subprocess
 import sys
-import sysconfig
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
@@ -118,24 +116,6 @@ def count_test_forms(path: pathlib.Path) -> int:
     return count
 
 
-def pythonpath_with_current_site_packages(existing: str | None) -> str:
-    paths = [
-        sysconfig.get_paths().get("purelib"),
-        sysconfig.get_paths().get("platlib"),
-        site.getusersitepackages(),
-    ]
-
-    if existing:
-        paths.extend(existing.split(os.pathsep))
-
-    deduped = []
-    for path in paths:
-        if path and path not in deduped:
-            deduped.append(path)
-
-    return os.pathsep.join(deduped)
-
-
 def run_test_file(
     root: pathlib.Path,
     petta_runner: pathlib.Path,
@@ -144,7 +124,6 @@ def run_test_file(
 ) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env["SHELL"] = "/bin/bash"
-    env["PYTHONPATH"] = pythonpath_with_current_site_packages(env.get("PYTHONPATH"))
 
     return subprocess.run(
         ["sh", str(petta_runner), str(test_file.relative_to(root))],

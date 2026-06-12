@@ -56,18 +56,35 @@ jobs:
           python-version: ${{ steps.swi-python.outputs.version }}
           cache: pip
 
+      - name: Create Python virtual environment
+        run: |
+          python -m venv "$RUNNER_TEMP/metamo-venv"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/metamo-venv" >> "$GITHUB_ENV"
+          echo "$RUNNER_TEMP/metamo-venv/bin" >> "$GITHUB_PATH"
+
       - name: Checkout PeTTa
         run: |
           git clone --depth 1 --branch "$PETTA_REF" "$PETTA_REPOSITORY" "$RUNNER_TEMP/PeTTa"
 
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install "$RUNNER_TEMP/PeTTa"
+          "$VIRTUAL_ENV/bin/python" -m pip install --upgrade pip
+          "$VIRTUAL_ENV/bin/python" -m pip install -r requirements.txt
+          "$VIRTUAL_ENV/bin/python" -m pip install "$RUNNER_TEMP/PeTTa"
+
+      - name: Check SWI-Prolog Python environment
+        run: |
+          swipl -q -g "\
+            use_module(library(janus)), \
+            py_version, \
+            py_call(datetime:'MINYEAR', MinYear), \
+            format('datetime MINYEAR ~w~n', [MinYear]), \
+            py_call(numpy:'__version__', NumpyVersion), \
+            format('NumPy ~w~n', [NumpyVersion]), \
+            halt."
 
       - name: Run MeTTa test files
         env:
           PETTA_PATH: ${{ runner.temp }}/PeTTa
         run: |
-          python scripts/run-tests.py
+          "$VIRTUAL_ENV/bin/python" scripts/run-tests.py
