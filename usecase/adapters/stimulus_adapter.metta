@@ -37,23 +37,23 @@
   (let*
     (
       ; extract signals  
-      ($complexity   (find_by_key complexity               $context-list))
-      ($ambiguity  (find_by_key ambiguity                $context-list))
-      ($threshold  (find_by_key threshold                $context-list))
-      ($familiarity_signal  (find_by_key topic_familiarity       $context-list))
-      ($failure_signal   (find_by_key failure_signal           $context-list))
-      ($reflective_intent   (find_by_key reflective_intent        $context-list))
-      ($valence  (find_by_key valence                  $context-list))
-      ($needs_external_evidence  (find_by_key needs_external_evidence  $context-list))
-      ($task (find_by_key needs_task_plan          $context-list))
-      ($ms   (find_by_key needs_multi_source_integration $context-list))
-      ($verify_request   (find_by_key verify_request           $context-list))
-      ($urgency  (find_by_key urgent                  $context-list))
+      ($complexity   (findByKey complexity               $context-list))
+      ($ambiguity  (findByKey ambiguity                $context-list))
+      ($threshold  (findByKey threshold                $context-list))
+      ($familiarity_signal  (findByKey topic_familiarity       $context-list))
+      ($failure_signal   (findByKey failure_signal           $context-list))
+      ($reflective_intent   (findByKey reflective_intent        $context-list))
+      ($valence  (findByKey valence                  $context-list))
+      ($needs_external_evidence  (findByKey needs_external_evidence  $context-list))
+      ($task (findByKey needs_task_plan          $context-list))
+      ($ms   (findByKey needs_multi_source_integration $context-list))
+      ($verify_request   (findByKey verify_request           $context-list))
+      ($urgency  (findByKey urgent                  $context-list))
 
       ; Novelty  
       ; High novelty = unfamiliar + complex + reflective + externally-driven
       ($novelty
-        (eval (_clamp01
+        (eval (clampToUnitInterval
           (+  (* 0.40 (- 1.0 $familiarity_signal))
             (+ (* 0.25 $complexity)
               (+ (* 0.20 $reflective_intent)
@@ -62,9 +62,9 @@
 
       ; Conduciveness  
       ; High conduciveness = familiar territory, low ambiguity, positive mood
-      ($val_norm (eval (_clamp01 (* (+ $valence 1.0) 0.5))))
+      ($val_norm (eval (clampToUnitInterval (* (+ $valence 1.0) 0.5))))
       ($conduciveness
-        (eval (_clamp01
+        (eval (clampToUnitInterval
           (+  (* 0.40 $familiarity_signal)
             (+ (* 0.30 (- 1.0 $ambiguity))
               (+ (* 0.20 $val_norm)
@@ -76,7 +76,7 @@
       ; verify_request hard-boosts risk (user suspects something is wrong)
       ($vr_boost (if (== $verify_request 1.0) 0.15 0.0))
       ($risk
-        (eval (_clamp01
+        (eval (clampToUnitInterval
           (+ (* 0.40 $threshold)
             (+ (* 0.30 $failure_signal)
               (+ (* 0.20 $ambiguity)
@@ -87,7 +87,7 @@
       ; Effort  
       ; Effort = complexity + multi-source + planning + ambiguity
       ($effort
-        (eval (_clamp01
+        (eval (clampToUnitInterval
           (+ (* 0.40 $complexity)
             (+ (* 0.25 $ms)
               (+ (* 0.20 $task)
@@ -108,10 +108,10 @@
 
 (= (getStimulusValues (stimulus $stimulus-list))
   (stimulus (
-    (find_by_key novelty $stimulus-list)
-    (find_by_key conduciveness $stimulus-list)
-    (find_by_key risk $stimulus-list)
-    (find_by_key effort $stimulus-list)
+    (findByKey novelty $stimulus-list)
+    (findByKey conduciveness $stimulus-list)
+    (findByKey risk $stimulus-list)
+    (findByKey effort $stimulus-list)
   ))
 )
  

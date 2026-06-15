@@ -90,7 +90,7 @@
 ; Example:
 ;   (qwestorActionAtom act_search)
 ;   → (action act_search (0.10 0.65 ...) 0.10 (...))
-(= (qwestorActionAtom $name)
+(= (getQwestorActionValue $name)
   (match &self (QwestorAction $name $atom) $atom)
 )
 
@@ -98,12 +98,12 @@
 ; Returns all 7 action atoms which will be used in magusDecide 
 (= (qwestorCandidates)
   (
-    (qwestorActionAtom act_respond)
-    (qwestorActionAtom act_search)
-    (qwestorActionAtom act_verify)
-    (qwestorActionAtom act_clarify)
-    (qwestorActionAtom act_decompose)
-    (qwestorActionAtom act_think)
-    (qwestorActionAtom act_synthesize)
+    (getQwestorActionValue act_respond)
+    (getQwestorActionValue act_search)
+    (getQwestorActionValue act_verify)
+    (getQwestorActionValue act_clarify)
+    (getQwestorActionValue act_decompose)
+    (getQwestorActionValue act_think)
+    (getQwestorActionValue act_synthesize)
   )
 )

@@ -40,7 +40,7 @@
 ; Clamp a numeric value to [0,1].
 ; Equivalent to Python's clamp_to_unit_interval function.
 
-(= (_clamp01 $x)
+(= (clampToUnitInterval $x)
   (if (and (< $x 1) (> $x 0))
      $x
      (if (>= $x 1)
@@ -53,7 +53,7 @@
 ; Look up a value by key in a list of key-value pairs.
 ; Returns the value using superpose if found, otherwise continues search.
 
-(= (find_by_key $key $dic_list)
+(= (findByKey $key $dic_list)
 (if (== $dic_list ())
      ()
         (let* (
@@ -63,7 +63,7 @@
             )
             (if (== $k $key)
                 (superpose $v)
-                (find_by_key $key $next)
+                (findByKey $key $next)
             )
         )
 
@@ -73,7 +73,7 @@
 ; Retrieve a goal value from the space given a goal name.
 ; Maps the goal to its fixed index in the goal list.
 
-(= (get-goal $space $goal-name)
+(= (getSingleGoal $space $goal-name)
  (let*
   (
     ($goal-vec  (match $space ($goals $modulators $anti-goals) $goals))
@@ -104,7 +104,7 @@
 )
 
 (= (getGoalQwestor $space $goal-name)
-   (get-goal $space $goal-name)
+   (getSingleGoal $space $goal-name)
 )
 
 ; Add multiple items to a space recursively.

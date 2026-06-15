@@ -1,6 +1,6 @@
 
 
-; congig file for aplha, modulators , context values (for case where the context parser fails), goals and anti-goal 
+; config file for aplha, modulators , context values (for case where the context parser fails), goals and anti-goal 
 
 ; ─────────────────────────────────────────────
 ; Alpha hyper-parameters (learning rates)
@@ -39,7 +39,7 @@
 )
 
 
-; ─────────────────────────────────────default-anti-goals────────
+; ─────────────────────────────────────────────
 ; Default modulator vector (13 modulators)
 ; ─────────────────────────────────────────────
 (= (default-mods) (

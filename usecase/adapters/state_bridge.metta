@@ -60,18 +60,18 @@
       ($m_sec  (getMod $space m_securing))
 
       ; build OpenPSI goal vector  
-      ($gInd   (eval (_clamp01 $over_safety)))
-      ($gTrans (eval (_clamp01 (/ (+ $novelty_g $breakthrough_g) 2.0))))
-      ($gHelp  (eval (_clamp01 (/ (+ $help_short_g $help_long_g) 2.0))))
-      ($gCurio (eval (_clamp01 $knowledge_g)))
-      ($gNovel (eval (_clamp01 $novelty_g)))
-      ($gSelf  (eval (_clamp01 $success_moderate_g)))
-      ($gEthic (eval (_clamp01 $over_honesty_g)))
-      ($gSoc   (eval (_clamp01 $social_g)))
+      ($gInd   (eval (clampToUnitInterval $over_safety)))
+      ($gTrans (eval (clampToUnitInterval (/ (+ $novelty_g $breakthrough_g) 2.0))))
+      ($gHelp  (eval (clampToUnitInterval (/ (+ $help_short_g $help_long_g) 2.0))))
+      ($gCurio (eval (clampToUnitInterval $knowledge_g)))
+      ($gNovel (eval (clampToUnitInterval $novelty_g)))
+      ($gSelf  (eval (clampToUnitInterval $success_moderate_g)))
+      ($gEthic (eval (clampToUnitInterval $over_honesty_g)))
+      ($gSoc   (eval (clampToUnitInterval $social_g)))
 
       ; build OpenPSI modulator vector  
       ; valence: map Qwestor's [-1,1] to OpenPSI's [0,1]
-      ($val_openpsi (eval (_clamp01 (* (+ $m_val 1.0) 0.5))))
+      ($val_openpsi (eval (clampToUnitInterval (* (+ $m_val 1.0) 0.5))))
     )
     (motivation
       ($gInd $gTrans $gHelp $gCurio $gNovel $gSelf $gEthic $gSoc)

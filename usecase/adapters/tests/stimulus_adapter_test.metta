@@ -2,9 +2,9 @@
 !(import! &self ../stimulus_adapter)
 
 
-!(test (find_by_key complexity ((urgent 0.0) (complexity 0.1) (ambiguity 0.0) (expertise 0.5) (threshold 0.0) (topic_familiarity 0.9) (failure_signal 0.0) (intent_type factual) (reflective_intent 0.1) (verify_request 0) (needs_external_evidence 0.0) (needs_task_plan 0.0) (needs_multi_source_integration 0.0) (valence 0.0))) 0.1)
-!(test (find_by_key ambiguity ((urgent 0.0) (complexity 0.1) (ambiguity 0.08) (expertise 0.5) (threshold 0.0) (topic_familiarity 0.9) (failure_signal 0.0) (intent_type factual) (reflective_intent 0.1) (verify_request 0) (needs_external_evidence 0.0) (needs_task_plan 0.0) (needs_multi_source_integration 0.0) (valence 0.0))) 0.08)
-!(test (find_by_key needs_multi_source_integration ((urgent 0.0) (complexity 0.1) (ambiguity 0.0) (expertise 0.5) (threshold 0.0) (topic_familiarity 0.9) (failure_signal 0.0) (intent_type factual) (reflective_intent 0.1) (verify_request 0) (needs_external_evidence 0.0) (needs_task_plan 0.0) (needs_multi_source_integration 0.7) (valence 0.0))) 0.7)
+!(test (findByKey complexity ((urgent 0.0) (complexity 0.1) (ambiguity 0.0) (expertise 0.5) (threshold 0.0) (topic_familiarity 0.9) (failure_signal 0.0) (intent_type factual) (reflective_intent 0.1) (verify_request 0) (needs_external_evidence 0.0) (needs_task_plan 0.0) (needs_multi_source_integration 0.0) (valence 0.0))) 0.1)
+!(test (findByKey ambiguity ((urgent 0.0) (complexity 0.1) (ambiguity 0.08) (expertise 0.5) (threshold 0.0) (topic_familiarity 0.9) (failure_signal 0.0) (intent_type factual) (reflective_intent 0.1) (verify_request 0) (needs_external_evidence 0.0) (needs_task_plan 0.0) (needs_multi_source_integration 0.0) (valence 0.0))) 0.08)
+!(test (findByKey needs_multi_source_integration ((urgent 0.0) (complexity 0.1) (ambiguity 0.0) (expertise 0.5) (threshold 0.0) (topic_familiarity 0.9) (failure_signal 0.0) (intent_type factual) (reflective_intent 0.1) (verify_request 0) (needs_external_evidence 0.0) (needs_task_plan 0.0) (needs_multi_source_integration 0.7) (valence 0.0))) 0.7)
 
 !(test
   (projectStimulus (

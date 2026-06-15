@@ -29,14 +29,14 @@
 	0.45
 )
 
-; get-goal: reads the requested goal value from the current space.
+; getSingleGoal: reads the requested goal value from the current space.
 !(test
-	(get-goal &space efficiency)
+	(getSingleGoal &space efficiency)
 	0.60
 )
 
-; find_by_key: returns the first matching value in a pair list.
+; findByKey: returns the first matching value in a pair list.
 !(test
-	(find_by_key novelty ((efficiency 0.60) (novelty 0.46) (coherence 0.58)))
+	(findByKey novelty ((efficiency 0.60) (novelty 0.46) (coherence 0.58)))
 	0.46
 )
