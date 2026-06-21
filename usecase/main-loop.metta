@@ -44,11 +44,24 @@
 !(import! &self ../dynamics/coherence)
 !(import! &self ../main/main)
 
+!(import! &self "session_store.py")
+!(import! &self "io_bridge.py")
+!(import! &self session_helpers)
+
 
 ; Initialize a new reasoning space for Qwestor
 
 !(bind! &space (new-space))
-!(addState &space ((default-goals) (default-mods) (default-anti-goals)))
+
+(= (sessionId) qwestor_session_a)
+
+!(if (py-call (session_store.has_session (sessionId)))
+    (addState &space (
+        (goal-vector (py-call (session_store.load_goals (sessionId))))
+        (modulator-vector (py-call (session_store.load_mods (sessionId))))
+        (anti-goals (py-call (session_store.load_anti_goals (sessionId))))))
+    (addState &space ((default-goals) (default-mods) (default-anti-goals)))
+)
 
  
 
@@ -124,6 +137,14 @@
       ($next-motiv (subsystemMotivation (car-atom $next-states)))
       ($_ (println! ("[STEP 9] next-motiv: " $next-motiv)))
 
+      ($_ (injectMotivation $space $next-motiv))
+
+      ($next-goals (motivationGoals $next-motiv))
+      ($gInd   (index-atom $next-goals 0))
+      ($gTrans (index-atom $next-goals 1))
+      ($answer (llmGenerateFinalResponse $query $action-name $gInd $gTrans))
+      ($_ (println! ("\nAssistant: " $answer)))
+
       ; Step 10 ─ Compute merged target for candidate re-scoring
       ; Needed for transparency / ranked scoring of all candidates
 
@@ -142,12 +163,54 @@
     )
     
     ; Print the full Qwestor decision report
-    (printQwestorResult $result)
+    (let $_ (printQwestorResult $result)
+        ($action-name $answer)
+    )
   )
 )
 
 
+(= (saveCurrentSession $space)
+    (let*
+        (
+            ($state (match $space ($g $m $a) ($g $m $a)))
+            ($goals (cdr-atom (index-atom $state 0)))
+            ($mods  (cdr-atom (index-atom $state 1)))
+            ($anti  (cdr-atom (index-atom $state 2)))
+        )
+        (py-call (session_store.save_session (sessionId) $goals $mods $anti))
+    )
+)
+
+(= (qwestorLoop $space $query)
+    (if (or (== $query quit) (== $query exit))
+        (saveCurrentSession $space)
+        (let* (
+                ($turn-result (runQwestor $space $query))
+                ($turn-action (index-atom $turn-result 0))
+                ($turn-answer (index-atom $turn-result 1))
+                ($_ (py-call (session_store.log_turn (sessionId) $query $turn-action $turn-answer)))
+            )
+            (qwestorLoop $space (py-call (io_bridge.read_user_input "\nYou: ")))
+        )
+    )
+)
+
+(= (qwestorLoopFromList $space $queries)
+    (if (== $queries ())
+        (saveCurrentSession $space)
+        (let* (
+                (($query $rest) (decons-atom $queries))
+                ($turn-result (runQwestor $space $query))
+                ($turn-action (index-atom $turn-result 0))
+                ($turn-answer (index-atom $turn-result 1))
+                ($_ (py-call (session_store.log_turn (sessionId) $query $turn-action $turn-answer)))
+            )
+            (qwestorLoopFromList $space $rest)
+        )
+    )
+)
 
 
 ; Example execution: process a query 
-!(runQwestor &space "What are the most promising approaches to aligning superintelligent AI systems that don't rely on RLHF?")
+!(qwestorLoop &space (py-call (io_bridge.read_user_input "\nYou: ")))
