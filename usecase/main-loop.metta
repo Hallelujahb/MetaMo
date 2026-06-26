@@ -1,4 +1,3 @@
-
 ; Qwestor Main Loop
 ;
 ; Full pipeline:
@@ -174,42 +173,62 @@
 )
 
 
+; saveCurrentSession
+; Saves the current motivation state (goals, mods, anti-goals) of the space
+; to persistent storage using the session_store.
 (= (saveCurrentSession $space)
     (let*
         (
+            ; Extract the state components from the current space.
             ($state (match $space ($g $m $a) ($g $m $a)))
             ($goals (cdr-atom (index-atom $state 0)))
             ($mods  (cdr-atom (index-atom $state 1)))
             ($anti  (cdr-atom (index-atom $state 2)))
         )
+        ; Call Python function to save the session data.
         (py-call (session_store.save_session (sessionId) $goals $mods $anti))
     )
 )
 
+; qwestorLoop
+; The main interactive loop for Qwestor.
+; Continues processing user queries until "quit" or "exit" is entered.
 (= (qwestorLoop $space $query)
     (if (or (== $query quit) (== $query exit))
+        ; If user wants to quit, save the current session state.
         (saveCurrentSession $space)
         (let* (
+                ; Run the main Qwestor pipeline for the current query.
                 ($turn-result (runQwestor $space $query))
                 ($turn-action (index-atom $turn-result 0))
                 ($turn-answer (index-atom $turn-result 1))
+                ; Log the current turn's details.
                 ($_ (py-call (session_store.log_turn (sessionId) $query $turn-action $turn-answer)))
             )
+            ; Recursively call qwestorLoop for the next user input.
             (qwestorLoop $space (py-call (io_bridge.read_user_input "\nYou: ")))
         )
     )
 )
 
+; qwestorLoopFromList
+; Processes a list of queries non-interactively.
+; Useful for automated testing or processing predefined scenarios.
 (= (qwestorLoopFromList $space $queries)
     (if (== $queries ())
+        ; If the query list is empty, save the session and terminate.
         (saveCurrentSession $space)
         (let* (
+                ; Deconstruct the list to get the current query and the rest.
                 (($query $rest) (decons-atom $queries))
+                ; Run Qwestor for the current query.
                 ($turn-result (runQwestor $space $query))
                 ($turn-action (index-atom $turn-result 0))
                 ($turn-answer (index-atom $turn-result 1))
+                ; Log the current turn.
                 ($_ (py-call (session_store.log_turn (sessionId) $query $turn-action $turn-answer)))
             )
+            ; Recursively call qwestorLoopFromList with the remaining queries.
             (qwestorLoopFromList $space $rest)
         )
     )
